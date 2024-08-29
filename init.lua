@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -114,6 +114,31 @@ vim.opt.showmode = false
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
 -- vim.opt.clipboard = 'unnamedplus'
+vim.g.clipboard = {
+  name = 'OSC 52',
+  copy = {
+    ['+'] = require('vim.ui.clipboard.osc52').copy '+',
+    ['*'] = require('vim.ui.clipboard.osc52').copy '*',
+  },
+  paste = {
+    ['+'] = require('vim.ui.clipboard.osc52').paste '+',
+    ['*'] = require('vim.ui.clipboard.osc52').paste '*',
+  },
+}
+vim.keymap.set('v', '<C-S-c>', '"+y')
+
+-- vim.g.clipboard = {
+--   name = 'myClipboard',
+--   copy = {
+--     ['+'] = { 'xclip', '-selection', 'clipboard', '-in' },
+--     ['*'] = { 'xclip', '-selection', 'primary', '-in' },
+--   },
+--   paste = {
+--     ['+'] = { 'xclip', '-selection', 'clipboard', '-out' },
+--     ['*'] = { 'xclip', '-selection', 'primary', '-out' },
+--   },
+--   cache_enabled = 1,
+-- }
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -191,9 +216,17 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.keymap.set('t', '<Esc>', '<C-\\><C-N>', { desc = 'terminal move' })
+
+vim.keymap.set('t', '<C-h>', '<C-\\><C-N><C-w>h', { desc = 'terminal move' })
+vim.keymap.set('t', '<C-j>', '<C-\\><C-N><C-w>j', { desc = 'terminal move' })
+vim.keymap.set('t', '<C-k>', '<C-\\><C-N><C-w>k', { desc = 'terminal move' })
+vim.keymap.set('t', '<C-l>', '<C-\\><C-N><C-w>l', { desc = 'terminal move' })
+--vim.api.nvim_command 'autocmd TermOpen * startinsert'
+--vim.api.nvim_command 'autocmd TermOpen * setlocal nonumber' -- no numbers
+--vim.api.nvim_command 'autocmd TermEnter * setlocal signcolumn=no'
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
-
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.highlight.on_yank()`
@@ -271,6 +304,15 @@ require('lazy').setup({
   -- Then, because we use the `config` key, the configuration only runs
   -- after the plugin has been loaded:
   --  config = function() ... end
+  --
+  --
+  --      ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+  --      ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+  --      ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+  --      ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+  --      ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+  --      ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
+  --      ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
 
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
@@ -281,12 +323,33 @@ require('lazy').setup({
       -- Document existing key chains
       require('which-key').add {
         { '<leader>c', group = '[C]ode' },
+<<<<<<< Updated upstream
         { '<leader>d', group = '[D]ocument' },
         { '<leader>r', group = '[R]ename' },
         { '<leader>s', group = '[S]earch' },
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+=======
+        { '<leader>c_', hidden = true },
+        { '<leader>d', group = '[D]ocument' },
+        { '<leader>d_', hidden = true },
+        { '<leader>h', group = 'Git [H]unk' },
+        { '<leader>h_', hidden = true },
+        { '<leader>r', group = '[R]ename' },
+        { '<leader>r_', hidden = true },
+        { '<leader>s', group = '[S]earch' },
+        { '<leader>s_', hidden = true },
+        { '<leader>t', group = '[T]oggle' },
+        { '<leader>t_', hidden = true },
+        { '<leader>w', group = '[W]orkspace' },
+        { '<leader>w_', hidden = true },
+      }
+      -- visual mode { mode = 'v' }  ['<leader>h'] = { 'Git [H]unk' },
+      -- changed from .register to .add
+      require('which-key').add {
+        { '<leader>h', desc = 'Git [H]unk', mode = 'v' },
+>>>>>>> Stashed changes
       }
     end,
   },
