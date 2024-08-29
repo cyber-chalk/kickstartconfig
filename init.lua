@@ -323,14 +323,6 @@ require('lazy').setup({
       -- Document existing key chains
       require('which-key').add {
         { '<leader>c', group = '[C]ode' },
-<<<<<<< Updated upstream
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
-=======
         { '<leader>c_', hidden = true },
         { '<leader>d', group = '[D]ocument' },
         { '<leader>d_', hidden = true },
@@ -349,7 +341,6 @@ require('lazy').setup({
       -- changed from .register to .add
       require('which-key').add {
         { '<leader>h', desc = 'Git [H]unk', mode = 'v' },
->>>>>>> Stashed changes
       }
     end,
   },
