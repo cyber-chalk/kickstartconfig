@@ -51,7 +51,7 @@ Kickstart Guide:
       - Tutor
       - <enter key>
 
-    (If you already know the Neovim basics, you can skip this step.)
+    tIf you already know the Neovim basics, you can skip this step.)
 
   Once you've completed that, you can continue working through **AND READING** the rest
   of the kickstart init.lua.
@@ -109,7 +109,7 @@ vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
-
+vim.g.c_syntax_for_h = 1
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
@@ -125,7 +125,7 @@ vim.g.clipboard = {
     ['*'] = require('vim.ui.clipboard.osc52').paste '*',
   },
 }
-vim.keymap.set('v', '<C-S-c>', '"+y')
+vim.keymap.set('v', '<C-m>', '"+y', { noremap = true })
 
 -- vim.g.clipboard = {
 --   name = 'myClipboard',
@@ -222,6 +222,13 @@ vim.keymap.set('t', '<C-h>', '<C-\\><C-N><C-w>h', { desc = 'terminal move' })
 vim.keymap.set('t', '<C-j>', '<C-\\><C-N><C-w>j', { desc = 'terminal move' })
 vim.keymap.set('t', '<C-k>', '<C-\\><C-N><C-w>k', { desc = 'terminal move' })
 vim.keymap.set('t', '<C-l>', '<C-\\><C-N><C-w>l', { desc = 'terminal move' })
+
+vim.api.nvim_create_autocmd('TermOpen', {
+  -- group = 'TerminalSetup',
+  pattern = '*',
+  command = 'setlocal nonumber',
+})
+
 --vim.api.nvim_command 'autocmd TermOpen * startinsert'
 --vim.api.nvim_command 'autocmd TermOpen * setlocal nonumber' -- no numbers
 --vim.api.nvim_command 'autocmd TermEnter * setlocal signcolumn=no'
@@ -281,11 +288,11 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
+        --   add = { text = '+' },
+        --   change = { text = '┃'' },
+        delete = { text = '┃' },
+        --   topdelete = { text = '‾' },
+        changedelete = { text = '┃' },
       },
     },
   },
@@ -351,7 +358,21 @@ require('lazy').setup({
   -- you do for a plugin at the top level, you can do for a dependency.
   --
   -- Use the `dependencies` key to specify the dependencies of a particular plugin
+  {
+    'lervag/vimtex',
+    lazy = false, -- we don't want to lazy load VimTeX
+    -- tag = "v2.15", -- uncomment to pin to a specific release
+    init = function()
+      -- VimTeX configuration goes here, e.g.
+      -- vim.g.vimtex_view_method = 'zathura'
+      vim.cmd 'filetype plugin indent on'
 
+      -- Enable syntax highlighting.
+      vim.cmd 'syntax enable'
+      vim.g.vimtex_compiler_method = 'latexmk'
+      vim.g.vimtex_view_method = 'mupdf'
+    end,
+  },
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
@@ -402,11 +423,12 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
+        defaults = {
+          mappings = {
+            n = { ['<C-n>'] = require('telescope.actions').delete_buffer },
+            i = { ['<c-n>'] = require('telescope.actions').delete_buffer },
+          },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -619,6 +641,7 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      capabilities.textDocument.completion.completionItem.snippetSupport = false
       local servers = {
         clangd = {
           settings = {
@@ -651,7 +674,7 @@ require('lazy').setup({
                 callSnippet = 'Replace',
               },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              -- diagnostics = { disable = { 'missing-fields' } },
+              --diagnostics = { disable = { 'missing-fields' }},
             },
           },
         },
@@ -801,10 +824,13 @@ require('lazy').setup({
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          ['<Tab>'] = cmp.mapping.select_next_item(),
+          -- ['<CR>'] = cmp.mapping.confirm {},
+          -- ['<Tab>'] = cmp.mapping.select_next_item(),
+          -- ['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          --MY WAY
+          ['<CR>'] = cmp.mapping.select_next_item(),
           ['<S-Tab>'] = cmp.mapping.select_prev_item(),
-
+          ['<Tab>'] = cmp.mapping.confirm { select = false },
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
@@ -852,14 +878,22 @@ require('lazy').setup({
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+    -- priority = 1000, -- Make sure to load this before all the other start plugins.
+    -- init = function()
+    --   -- Load the colorscheme here.
+    --   -- Like many other themes, this one has different styles, and you could load
+    --   -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+    --   vim.cmd.colorscheme 'tokyonight-night'
+    --
+    --   -- You can configure highlights by doing something like:
+    --   vim.cmd.hi 'Comment gui=none'
+    -- end,
+  },
+  {
+    'catppuccin/nvim',
+    priority = 1000,
     init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-
-      -- You can configure highlights by doing something like:
+      vim.cmd.colorscheme 'catppuccin'
       vim.cmd.hi 'Comment gui=none'
     end,
   },
@@ -936,6 +970,17 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
+  {
+    'github/copilot.vim',
+    config = function()
+      -- Key mapping for Copilot
+      vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
+        expr = true,
+        replace_keycodes = false,
+      })
+      vim.g.copilot_no_tab_map = true
+    end,
+  },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -981,5 +1026,10 @@ require('lazy').setup({
   },
 })
 
+-- vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
+--   expr = true,
+--   replace_keycodes = false,
+-- })
+-- vim.g.copilot_no_tab_map = true
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
